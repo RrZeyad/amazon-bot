@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import schedule
 import time
 from twilio.rest import Client
 import sys
@@ -50,15 +51,21 @@ def check_amazon_stock(url):
     print(f"✅ المنتج متاح في المخزون: {url}")
     return True
 
-if __name__ == "__main__":
+def daily_stock_check():
+    """ التحقق من جميع المنتجات يوميًا """
     product_urls = [
         "https://www.amazon.sa/dp/B0CTJF2L8H",
         "https://amzn.eu/d/0N3nSz0",  
         "https://amzn.eu/d/0wehpMr"
     ]
+    for url in product_urls:
+        check_amazon_stock(url)
+    print("✅ تم التحقق من المنتجات اليوم!")
 
-    while True:
-        for url in product_urls:
-            check_amazon_stock(url)
-        print("⌛ سيتم التحقق مرة أخرى بعد ساعة...")
-        time.sleep(3600)  # التحقق كل ساعة
+# جدولة الفحص ليتم يوميًا في الساعة 8 صباحًا
+schedule.every().day.at("08:00").do(daily_stock_check)
+
+print("🔄 البوت يعمل الآن وسيتحقق من المخزون يوميًا في الساعة 8 صباحًا...")
+while True:
+    schedule.run_pending()
+    time.sleep(60)  # فحص الجدولة كل دقيقة
